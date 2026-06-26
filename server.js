@@ -216,6 +216,49 @@ client.on('messageCreate', async (message) => {
     const userId = message.author.id;
     const username = message.author.username;
     
+    // ===== НОВАЯ КОМАНДА: !лудка =====
+    if (message.content.toLowerCase() === '!лудка') {
+        try {
+            const embed = {
+                title: '🎰 LUDKAA ROULETTE 🎰',
+                description: 'Крутите рулетку и выигрывайте роли!',
+                fields: [
+                    {
+                        name: '🔗 Ссылка',
+                        value: 'https://discord-ludka-production.up.railway.app',
+                        inline: false
+                    },
+                    {
+                        name: '📖 Как играть?',
+                        value: '1️⃣ Зарабатывайте токены за сообщения (10 сообщений = 1 токен)\n2️⃣ Введите свой ID на сайте\n3️⃣ Крутите рулетку за 1 токен',
+                        inline: false
+                    },
+                    {
+                        name: '🎯 Доступные роли',
+                        value: 'Ташла ПТУ, Нытик сука, Калопоглатитель, Баакен, Скорострельный, Рыбная братва, Чурка, Профитроль, ЖЕНСКИЕ НОГИ, АрЫстан Назераке, Сифилисная сука, Ваннорасказчик, Артём поедатель пельменей, Король Додепа, Селезень, Пидрохлорид',
+                        inline: false
+                    }
+                ],
+                color: 0xF7971E,
+                thumbnail: {
+                    url: message.guild.iconURL({ dynamic: true })
+                },
+                footer: {
+                    text: '🎰 Ролльная LUDKAA',
+                    icon_url: message.author.displayAvatarURL({ dynamic: true })
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            await message.reply({ embeds: [embed] });
+            console.log(`🔗 ${username} запросил ссылку на сайт`);
+        } catch (error) {
+            console.error('❌ Ошибка при выполнении команды !лудка:', error);
+            await message.reply('❌ Произошла ошибка. Попробуйте позже.');
+        }
+        return;
+    }
+
     // ===== 1. КОМАНДА: !токены =====
     if (message.content.toLowerCase().startsWith('!токены')) {
         try {
