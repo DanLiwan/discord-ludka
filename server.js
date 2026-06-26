@@ -11,6 +11,15 @@ app.use(express.json());
 // Раздаём статические файлы
 app.use(express.static(path.join(__dirname, 'public')));
 
+// 👇 НОВЫЙ БЛОК - ОБРАБОТКА МАРШРУТОВ
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Discord бот
 const client = new Client({
     intents: [
@@ -23,11 +32,11 @@ const client = new Client({
 
 const TOKEN = process.env.DISCORD_TOKEN;
 
-// ⚠️ ЗАМЕНИТЕ НА СВОИ ID РОЛЕЙ И СЕРВЕРА!
+// ⚠️ ЗАМЕНИТЕ НА СВОИ ID!
 const ROLE_MAPPING = {
-    '🏔️ роль 1': '1519714246848413919',
-    '🌊 Роль 2': '1519714472569213119',
-    '🌆 Роль 3': '1519714563149402112',
+    '🏔️ Горы': '1519714246848413919',
+    '🌊 Море': '1519714472569213119',
+    '🌆 Город': '1519714563149402112',
 };
 
 const GUILD_ID = '1471915265280315433'; // ID вашего сервера
@@ -85,11 +94,6 @@ app.post('/api/give-role', async (req, res) => {
             error: `❌ ${error.message}`
         });
     }
-});
-
-// Все запросы к "/" отдаём index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
