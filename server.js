@@ -37,9 +37,22 @@ const VOICE_TOKEN_INTERVAL = 30 * 60 * 1000; // 30 минут
 
 // ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЕ ID РОЛЕЙ!
 const ROLE_MAPPING = {
-    '🏔️ Роль 1': '1519714246848413919',
-    '🌊 Роль 2': '1519714472569213119',
-    '🌆 Роль 3': '1519714563149402112',
+    'Ташла ПТУ': '1520108336723394561',
+    'Нытик сука': '1520108831030640660',
+    'Калопоглатитель': '1520109055052484802',
+    'Баакен': '1520109206559129741',
+    'Скорострельный': '1520109522645942332',
+    'Рыбная братва': '1520109676732092518',
+    'Чурка': '1520109763944251613',
+    'Профитроль': '1520109847863889981',
+    'ЖЕНСКИЕ НОГИ': '1520109969788371165',
+    'АрЫстан Назераке': '1520110213133369565',
+    'Сифилисная сука': '1520110307391967303',
+    'Ваннорасказчик': '1520110647612801338',
+    'Артём поедатель пельменей': '1520110665144995891',
+    'Король Додепа': '1520110768782049421',
+    'Селезень': '1520111177231761470',
+    'Пидрохлорид': '1520111363966500874',
 };
 
 const GUILD_ID = '1471915265280315433';
@@ -215,6 +228,58 @@ client.on('messageCreate', async (message) => {
         } catch (error) {
             console.error('❌ Ошибка при выдаче токена:', error);
         }
+    }
+});
+
+// ===== КОМАНДА !токены =====
+client.on('messageCreate', async (message) => {
+    // Игнорируем ботов и сообщения не на сервере
+    if (message.author.bot) return;
+    if (!message.guild) return;
+    
+    // Проверяем, что команда начинается с !токены
+    if (!message.content.toLowerCase().startsWith('!токены')) return;
+    
+    try {
+        const userId = message.author.id;
+        const username = message.author.username;
+        
+        // Получаем токены из базы данных
+        const tokens = await db.getTokens(userId);
+        const userInfo = await db.getUserInfo(userId);
+        const messagesCount = userInfo?.messages_count || 0;
+        
+        // Отправляем ответ
+        await message.reply({
+            embeds: [{
+                title: '💰 Ваш баланс токенов',
+                description: `
+**${username}**, вот ваш баланс:
+
+🎯 **Токены:** \`${tokens}\`
+💬 **Сообщений:** \`${messagesCount}\`
+🎰 **Спинов:** \`${Math.floor(messagesCount / 10)}\`
+
+> За 10 сообщений = 1 токен
+> За 30 минут в войсе = 1 токен
+                `,
+                color: 0xF7971E,
+                thumbnail: {
+                    url: message.author.displayAvatarURL({ dynamic: true })
+                },
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: '🎰 Ролльная LUDKAA',
+                    icon_url: message.guild.iconURL()
+                }
+            }]
+        });
+        
+        console.log(`📊 ${username} запросил баланс: ${tokens} токенов`);
+        
+    } catch (error) {
+        console.error('❌ Ошибка при выполнении команды !токены:', error);
+        await message.reply('❌ Произошла ошибка при получении баланса. Попробуйте позже.');
     }
 });
 
