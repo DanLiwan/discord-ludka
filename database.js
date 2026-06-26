@@ -1,11 +1,10 @@
-// database.js
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 const dbPath = path.join(__dirname, 'tokens.db');
 const db = new sqlite3.Database(dbPath);
 
-// Создаём таблицу пользователей
+// Создаём таблицу с индексами для скорости
 db.run(`
     CREATE TABLE IF NOT EXISTS users (
         user_id TEXT PRIMARY KEY,
@@ -16,7 +15,9 @@ db.run(`
     )
 `);
 
-// Функция: получить токены пользователя
+// Индекс для быстрого поиска по username
+db.run(`CREATE INDEX IF NOT EXISTS idx_username ON users(username)`);
+
 function getTokens(userId) {
     return new Promise((resolve, reject) => {
         db.get(
@@ -30,7 +31,6 @@ function getTokens(userId) {
     });
 }
 
-// Функция: добавить токены
 function addTokens(userId, username, amount) {
     return new Promise((resolve, reject) => {
         db.run(
@@ -49,7 +49,6 @@ function addTokens(userId, username, amount) {
     });
 }
 
-// Функция: списать токены
 function spendTokens(userId, amount) {
     return new Promise((resolve, reject) => {
         db.run(
@@ -64,7 +63,6 @@ function spendTokens(userId, amount) {
     });
 }
 
-// Функция: получить информацию о пользователе
 function getUserInfo(userId) {
     return new Promise((resolve, reject) => {
         db.get(
