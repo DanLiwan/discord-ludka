@@ -24,7 +24,7 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildVoiceStates, // 👈 ВАЖНО! Добавляем для голосовых каналов
+        GatewayIntentBits.GuildVoiceStates,
     ]
 });
 
@@ -33,7 +33,7 @@ const TOKEN = process.env.DISCORD_TOKEN;
 // НАСТРОЙКИ
 const MESSAGES_FOR_TOKEN = 10;
 const TOKENS_PER_SPIN = 1;
-const VOICE_TOKEN_INTERVAL = 30 * 60 * 1000; // 30 минут
+const VOICE_TOKEN_INTERVAL = 30 * 60 * 1000;
 
 // ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЕ ID РОЛЕЙ!
 const ROLE_MAPPING = {
@@ -206,31 +206,16 @@ setInterval(async () => {
     await refreshMemberCache();
 }, CACHE_TTL);
 
-// ===== СЧЁТЧИК СООБЩЕНИЙ =====
+// ===== ОБРАБОТКА СООБЩЕНИЙ (СЧЁТЧИК + КОМАНДЫ) =====
 const messageCounts = new Map();
 
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     if (!message.guild) return;
+    
     const userId = message.author.id;
     const username = message.author.username;
-    if (!membersCache.has(userId)) {
-        addMemberToCache(message.member);
-        console.log(`➕ Добавлен в кеш через сообщение: ${username}`);
-    }
-    const key = `${message.guild.id}-${userId}`;
-    const currentCount = (messageCounts.get(key) || 0) + 1;
-    messageCounts.set(key, currentCount);
-    if (currentCount % MESSAGES_FOR_TOKEN === 0) {
-        try {
-            await db.addTokens(userId, username, 1);
-            console.log(`✅ +1 токен для ${username} (${currentCount} сообщений)`);
-        } catch (error) {
-            console.error('❌ Ошибка при выдаче токена:', error);
-        }
-    }
-});
-
+    
     // ===== 1. КОМАНДА: !токены =====
     if (message.content.toLowerCase().startsWith('!токены')) {
         try {
@@ -271,6 +256,27 @@ client.on('messageCreate', async (message) => {
         }
         return;
     }
+    
+    // ===== 2. СЧЁТЧИК СООБЩЕНИЙ =====
+    if (!membersCache.has(userId)) {
+        addMemberToCache(message.member);
+        console.log(`➕ Добавлен в кеш через сообщение: ${username}`);
+    }
+    
+    const key = `${message.guild.id}-${userId}`;
+    const currentCount = (messageCounts.get(key) || 0) + 1;
+    messageCounts.set(key, currentCount);
+    
+    if (currentCount % MESSAGES_FOR_TOKEN === 0) {
+        try {
+            await db.addTokens(userId, username, 1);
+            console.log(`✅ +1 токен для ${username} (${currentCount} сообщений)`);
+        } catch (error) {
+            console.error('❌ Ошибка при выдаче токена:', error);
+        }
+    }
+});
+
 // ===== API =====
 app.post('/api/get-tokens', async (req, res) => {
     const { userId } = req.body;
@@ -287,6 +293,7 @@ app.post('/api/get-tokens', async (req, res) => {
             success: true,
             tokens: userInfo?.tokens || 0,
             messages: userInfo?.messages_count || 0,
+            spins: userInfo?.spins || 0,
             username: userData.user.username,
             userId: userData.id,
             found: true
