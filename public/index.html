@@ -29,6 +29,7 @@
             position: sticky;
             top: 0;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .header h1 {
@@ -60,9 +61,20 @@
             position: relative;
             overflow: hidden;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             background: radial-gradient(ellipse at center, #1a1a0e 0%, #0a0a0a 100%);
+            min-height: 0;
+        }
+
+        .roulette-track-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
         }
 
         .roulette-track {
@@ -71,6 +83,22 @@
             padding: 0 50px;
             position: relative;
             will-change: transform;
+        }
+
+        /* ---------- СТРЕЛКА НАД КАРТОЧКАМИ (перевёрнутая) ---------- */
+        .arrow {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%) rotate(180deg);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .arrow svg {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
         }
 
         /* ---------- КАРТОЧКИ ---------- */
@@ -168,39 +196,19 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* ---------- БЕЛАЯ СТРЕЛКА (треугольник) ---------- */
-        .arrow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 3;
-            pointer-events: none;
-        }
-
-        .arrow svg {
-            width: 60px;
-            height: 60px;
-            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
-        }
-
-        /* ---------- ПАНЕЛЬ УПРАВЛЕНИЯ ---------- */
+        /* ---------- ПАНЕЛЬ УПРАВЛЕНИЯ (ниже карточек) ---------- */
         .user-panel {
-            position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 15;
+            flex-shrink: 0;
+            width: 100%;
             background: rgba(0,0,0,0.85);
-            padding: 20px 30px;
-            border-radius: 16px;
-            border: 1px solid rgba(247, 151, 30, 0.3);
+            padding: 16px 24px 20px;
+            border-top: 1px solid rgba(247, 151, 30, 0.2);
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            min-width: 380px;
+            gap: 10px;
             align-items: center;
+            z-index: 15;
         }
 
         .user-panel .row {
@@ -229,6 +237,7 @@
             font-size: 0.95rem;
             min-width: 200px;
             flex: 1;
+            max-width: 320px;
             transition: all 0.3s ease;
         }
 
@@ -243,10 +252,10 @@
             display: flex;
             gap: 30px;
             align-items: center;
-            padding: 8px 20px;
-            background: rgba(247, 151, 30, 0.08);
+            padding: 6px 20px;
+            background: rgba(247, 151, 30, 0.06);
             border-radius: 12px;
-            border: 1px solid rgba(247, 151, 30, 0.15);
+            border: 1px solid rgba(247, 151, 30, 0.1);
         }
 
         .balance-item {
@@ -254,14 +263,14 @@
         }
 
         .balance-item .label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .balance-item .value {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 700;
             background: linear-gradient(90deg, #f7971e, #ffd200);
             -webkit-background-clip: text;
@@ -269,7 +278,7 @@
         }
 
         .balance-item .value.tokens {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
         }
 
         /* ---------- КНОПКИ ---------- */
@@ -283,12 +292,12 @@
         }
 
         .btn {
-            padding: 12px 32px;
+            padding: 10px 28px;
             border: none;
             border-radius: 50px;
             background: linear-gradient(90deg, #f7971e, #ffd200);
             color: #0a0a0a;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -298,7 +307,7 @@
         }
 
         .btn:hover:not(:disabled) {
-            transform: scale(1.05) translateY(-3px);
+            transform: scale(1.05) translateY(-2px);
             box-shadow: 0 10px 50px rgba(247, 151, 30, 0.5);
         }
 
@@ -310,6 +319,16 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
+        }
+
+        .btn-check {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 30px rgba(118, 75, 162, 0.3);
+        }
+
+        .btn-check:hover:not(:disabled) {
+            box-shadow: 0 10px 50px rgba(118, 75, 162, 0.5);
         }
 
         .btn-reset {
@@ -328,10 +347,10 @@
 
         .status {
             color: #ffd200;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-align: center;
-            min-height: 24px;
-            padding: 4px 12px;
+            min-height: 22px;
+            padding: 2px 12px;
         }
 
         .status.success {
@@ -426,13 +445,14 @@
 
         /* ---------- ФУТЕР ---------- */
         .footer {
-            padding: 12px 40px;
+            padding: 8px 40px;
             text-align: center;
             color: #333;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             letter-spacing: 2px;
             background: rgba(10,10,10,0.9);
             border-top: 1px solid #1a1a1a;
+            flex-shrink: 0;
         }
 
         .footer span {
@@ -451,11 +471,18 @@
             .header h1 {
                 font-size: 1.8rem;
             }
+            .header {
+                padding: 12px 20px;
+            }
+            .arrow svg {
+                width: 36px;
+                height: 36px;
+            }
+            .arrow {
+                top: -30px;
+            }
             .user-panel {
-                bottom: 100px;
-                padding: 15px 20px;
-                min-width: unset;
-                width: 92%;
+                padding: 12px 16px 16px;
             }
             .user-panel .row {
                 flex-direction: column;
@@ -464,12 +491,14 @@
             .user-panel input {
                 min-width: unset;
                 width: 100%;
+                max-width: 100%;
             }
             .balance {
                 gap: 15px;
                 padding: 6px 12px;
                 flex-wrap: wrap;
                 justify-content: center;
+                width: 100%;
             }
             .balance-item .value {
                 font-size: 1.2rem;
@@ -481,18 +510,14 @@
                 gap: 8px;
             }
             .btn {
-                padding: 10px 20px;
-                font-size: 0.85rem;
+                padding: 8px 18px;
+                font-size: 0.8rem;
             }
             .win-text {
                 font-size: 2.5rem;
             }
             .win-sub {
                 font-size: 1rem;
-            }
-            .arrow svg {
-                width: 40px;
-                height: 40px;
             }
         }
     </style>
@@ -505,17 +530,19 @@
     </div>
 
     <div class="roulette-wrapper">
-        <div class="roulette-track" id="rouletteTrack"></div>
+        <div class="roulette-track-container">
+            <div class="roulette-track" id="rouletteTrack"></div>
 
-        <!-- БЕЛАЯ СТРЕЛКА (треугольник) -->
-        <div class="arrow">
-            <svg viewBox="0 0 100 100">
-                <polygon points="50,10 90,90 10,90" fill="white" opacity="0.9" />
-            </svg>
+            <!-- СТРЕЛКА НАД КАРТОЧКАМИ (перевёрнутая) -->
+            <div class="arrow">
+                <svg viewBox="0 0 100 100">
+                    <polygon points="50,10 90,90 10,90" fill="white" opacity="0.9" />
+                </svg>
+            </div>
         </div>
     </div>
 
-    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ (НИЖЕ КАРТОЧЕК) -->
     <div class="user-panel" id="userPanel">
         <div class="row">
             <label for="userId">🆔 Имя или ID:</label>
@@ -816,7 +843,6 @@
             overlay.classList.add('show');
             createConfetti();
 
-            // Выдаём роль
             giveRole(itemName);
 
             setTimeout(() => {
@@ -894,7 +920,6 @@
         async function startRoulette() {
             if (isSpinning) return;
 
-            // Проверяем токены
             if (!currentUser) {
                 setStatus('❌ Сначала проверьте пользователя!', 'error');
                 return;
@@ -995,7 +1020,6 @@
             }
         });
 
-        // Загрузка сохранённого пользователя
         const savedUser = localStorage.getItem('discordUser');
         if (savedUser) {
             document.getElementById('userId').value = savedUser;
