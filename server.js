@@ -55,7 +55,7 @@ const ROLE_MAPPING = {
     'Пидрохлорид': '1520111363966500874',
 };
 
-const GUILD_ID = '1471915265280315433';
+const GUILD_ID = '1467562983289913470';
 
 // ===== КЕШ УЧАСТНИКОВ =====
 let membersCache = new Map();
