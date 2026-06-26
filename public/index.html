@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 Дискорд Рулетка</title>
+    <title>🎰 Дискорд LUDKA 🎰</title>
     <style>
         * {
             margin: 0;
@@ -34,7 +34,7 @@
         .header h1 {
             font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(90deg, #5865F2, #7289DA, #5865F2);
+            background: linear-gradient(90deg, #f7971e, #ffd200, #f7971e);
             background-size: 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -54,7 +54,7 @@
             margin-top: 5px;
         }
 
-        /* ----- Остальные стили такие же как в прошлой версии ----- */
+        /* ---------- ОСНОВНОЙ КОНТЕЙНЕР ---------- */
         .roulette-wrapper {
             flex: 1;
             position: relative;
@@ -62,7 +62,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            background: radial-gradient(ellipse at center, #1a1a0e 0%, #0a0a0a 100%);
         }
 
         .roulette-track {
@@ -73,6 +73,7 @@
             will-change: transform;
         }
 
+        /* ---------- КАРТОЧКИ ---------- */
         .card {
             flex: 0 0 280px;
             height: 400px;
@@ -90,7 +91,7 @@
             transform: scale(1.15);
             opacity: 1;
             filter: blur(0px);
-            box-shadow: 0 20px 60px rgba(88, 101, 242, 0.4), 0 0 80px rgba(88, 101, 242, 0.2);
+            box-shadow: 0 20px 60px rgba(247, 151, 30, 0.4), 0 0 80px rgba(247, 151, 30, 0.2);
             z-index: 5;
         }
 
@@ -134,7 +135,7 @@
             position: absolute;
             top: 15px;
             right: 15px;
-            background: rgba(88, 101, 242, 0.95);
+            background: rgba(247, 151, 30, 0.95);
             padding: 6px 16px;
             border-radius: 20px;
             font-size: 0.7rem;
@@ -155,7 +156,7 @@
             position: absolute;
             inset: -3px;
             border-radius: 26px;
-            background: linear-gradient(90deg, #5865F2, #7289DA, #5865F2);
+            background: linear-gradient(90deg, #f7971e, #ffd200, #f7971e);
             background-size: 300%;
             animation: borderGlow 2s linear infinite;
             z-index: -1;
@@ -167,37 +168,138 @@
             100% { background-position: 0% 50%; }
         }
 
-        .controls {
+        /* ---------- БЕЛАЯ СТРЕЛКА (треугольник) ---------- */
+        .arrow {
             position: absolute;
-            bottom: 40px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .arrow svg {
+            width: 60px;
+            height: 60px;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+        }
+
+        /* ---------- ПАНЕЛЬ УПРАВЛЕНИЯ ---------- */
+        .user-panel {
+            position: fixed;
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 15;
+            background: rgba(0,0,0,0.85);
+            padding: 20px 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(247, 151, 30, 0.3);
+            backdrop-filter: blur(10px);
             display: flex;
-            gap: 20px;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 380px;
             align-items: center;
-            z-index: 20;
+        }
+
+        .user-panel .row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .user-panel label {
+            color: #ffd200;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .user-panel input {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: #1a1a1a;
+            color: white;
+            font-size: 0.95rem;
+            min-width: 200px;
+            flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .user-panel input:focus {
+            outline: none;
+            border-color: #f7971e;
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.15);
+        }
+
+        /* ---------- БАЛАНС ТОКЕНОВ ---------- */
+        .balance {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            padding: 8px 20px;
+            background: rgba(247, 151, 30, 0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(247, 151, 30, 0.15);
+        }
+
+        .balance-item {
+            text-align: center;
+        }
+
+        .balance-item .label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .balance-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #f7971e, #ffd200);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .balance-item .value.tokens {
+            font-size: 1.8rem;
+        }
+
+        /* ---------- КНОПКИ ---------- */
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
             flex-wrap: wrap;
             justify-content: center;
+            width: 100%;
         }
 
         .btn {
-            padding: 14px 40px;
+            padding: 12px 32px;
             border: none;
             border-radius: 50px;
-            background: linear-gradient(90deg, #5865F2, #7289DA);
-            color: white;
-            font-size: 1.1rem;
+            background: linear-gradient(90deg, #f7971e, #ffd200);
+            color: #0a0a0a;
+            font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             letter-spacing: 1px;
             text-transform: uppercase;
-            box-shadow: 0 5px 30px rgba(88, 101, 242, 0.3);
+            box-shadow: 0 5px 30px rgba(247, 151, 30, 0.3);
         }
 
         .btn:hover:not(:disabled) {
             transform: scale(1.05) translateY(-3px);
-            box-shadow: 0 10px 50px rgba(88, 101, 242, 0.5);
+            box-shadow: 0 10px 50px rgba(247, 151, 30, 0.5);
         }
 
         .btn:active:not(:disabled) {
@@ -216,25 +318,82 @@
             box-shadow: 0 5px 30px rgba(118, 75, 162, 0.3);
         }
 
-        .counter {
-            color: #888;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
-            min-width: 160px;
+        .btn-reset:hover:not(:disabled) {
+            box-shadow: 0 10px 50px rgba(118, 75, 162, 0.5);
+        }
+
+        .btn-spin {
+            background: linear-gradient(90deg, #f7971e, #ffd200);
+        }
+
+        .status {
+            color: #ffd200;
+            font-size: 0.85rem;
             text-align: center;
+            min-height: 24px;
+            padding: 4px 12px;
         }
 
-        .counter span {
-            color: #7289DA;
-            font-weight: 700;
+        .status.success {
+            color: #57F287;
+        }
+
+        .status.error {
+            color: #ED4245;
+        }
+
+        /* ---------- ПОБЕДНЫЙ ОВЕРЛЕЙ ---------- */
+        .win-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .win-overlay.show {
+            opacity: 1;
+        }
+
+        .win-text {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #f7971e, #ffd200, #f7971e);
+            background-size: 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 1s infinite;
+            text-shadow: 0 0 60px rgba(247, 151, 30, 0.3);
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .win-overlay.show .win-text {
+            transform: scale(1);
+        }
+
+        .win-sub {
+            font-size: 1.5rem;
+            color: #fff;
+            -webkit-text-fill-color: white;
+            margin-top: 10px;
+        }
+
+        .win-tokens {
             font-size: 1.2rem;
+            color: #ffd200;
+            margin-top: 8px;
         }
 
+        /* ---------- КОНФЕТТИ ---------- */
         .confetti-container {
             position: fixed;
             top: 0;
@@ -265,50 +424,7 @@
             }
         }
 
-        .win-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 500;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .win-overlay.show {
-            opacity: 1;
-        }
-
-        .win-text {
-            font-size: 4rem;
-            font-weight: 900;
-            background: linear-gradient(90deg, #5865F2, #7289DA, #5865F2);
-            background-size: 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shimmer 1s infinite;
-            text-shadow: 0 0 60px rgba(88, 101, 242, 0.3);
-            transform: scale(0);
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .win-overlay.show .win-text {
-            transform: scale(1);
-        }
-
-        .win-sub {
-            font-size: 1.5rem;
-            color: #fff;
-            -webkit-text-fill-color: white;
-            margin-top: 10px;
-        }
-
+        /* ---------- ФУТЕР ---------- */
         .footer {
             padding: 12px 40px;
             text-align: center;
@@ -320,63 +436,10 @@
         }
 
         .footer span {
-            color: #5865F2;
+            color: #f7971e;
         }
 
-        /* Панель для ввода ID пользователя */
-        .user-panel {
-            position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 15;
-            background: rgba(0,0,0,0.8);
-            padding: 15px 25px;
-            border-radius: 16px;
-            border: 1px solid rgba(88, 101, 242, 0.3);
-            backdrop-filter: blur(10px);
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .user-panel label {
-            color: #ccc;
-            font-size: 0.9rem;
-        }
-
-        .user-panel input {
-            padding: 8px 16px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #1a1a1a;
-            color: white;
-            font-size: 0.9rem;
-            min-width: 200px;
-        }
-
-        .user-panel input:focus {
-            outline: none;
-            border-color: #5865F2;
-        }
-
-        .user-panel .status {
-            color: #7289DA;
-            font-size: 0.8rem;
-            min-width: 100px;
-            text-align: center;
-        }
-
-        .user-panel .status.success {
-            color: #57F287;
-        }
-
-        .user-panel .status.error {
-            color: #ED4245;
-        }
-
+        /* ---------- АДАПТИВ ---------- */
         @media (max-width: 768px) {
             .card {
                 flex: 0 0 200px;
@@ -388,18 +451,38 @@
             .header h1 {
                 font-size: 1.8rem;
             }
+            .user-panel {
+                bottom: 100px;
+                padding: 15px 20px;
+                min-width: unset;
+                width: 92%;
+            }
+            .user-panel .row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .user-panel input {
+                min-width: unset;
+                width: 100%;
+            }
+            .balance {
+                gap: 15px;
+                padding: 6px 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .balance-item .value {
+                font-size: 1.2rem;
+            }
+            .balance-item .value.tokens {
+                font-size: 1.4rem;
+            }
             .controls {
-                bottom: 20px;
-                gap: 10px;
+                gap: 8px;
             }
             .btn {
-                padding: 10px 24px;
-                font-size: 0.9rem;
-            }
-            .counter {
-                font-size: 0.8rem;
-                min-width: 100px;
-                padding: 6px 15px;
+                padding: 10px 20px;
+                font-size: 0.85rem;
             }
             .win-text {
                 font-size: 2.5rem;
@@ -407,14 +490,9 @@
             .win-sub {
                 font-size: 1rem;
             }
-            .user-panel {
-                bottom: 100px;
-                padding: 10px 15px;
-                width: 90%;
-            }
-            .user-panel input {
-                min-width: 150px;
-                width: 100%;
+            .arrow svg {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -422,69 +500,93 @@
 <body>
 
     <div class="header">
-        <h1>🎰 ДИСКОРД РУЛЕТКА</h1>
-        <p>ВЫИГРЫВАЙ РОЛИ НА СЕРВЕРЕ</p>
+        <h1>ROLES LLUDKAA</h1>
+        <p>ЗАРАБАТЫВАЙ ТОКЕНЫ ЗА СООБЩЕНИЯ · ВЫИГРЫВАЙ РОЛИ</p>
     </div>
 
     <div class="roulette-wrapper">
         <div class="roulette-track" id="rouletteTrack"></div>
 
+        <!-- БЕЛАЯ СТРЕЛКА (треугольник) -->
+        <div class="arrow">
+            <svg viewBox="0 0 100 100">
+                <polygon points="50,10 90,90 10,90" fill="white" opacity="0.9" />
+            </svg>
+        </div>
+    </div>
+
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <div class="user-panel" id="userPanel">
+        <div class="row">
+            <label for="userId">🆔 Имя или ID:</label>
+            <input type="text" id="userId" placeholder="Введите имя или ID" />
+            <button class="btn btn-check" id="checkBtn">👤 Проверить</button>
+        </div>
+
+        <div class="balance" id="balanceDisplay">
+            <div class="balance-item">
+                <div class="label">💰 Токены</div>
+                <div class="value tokens" id="tokensDisplay">0</div>
+            </div>
+            <div class="balance-item">
+                <div class="label">💬 Сообщений</div>
+                <div class="value" id="messagesDisplay">0</div>
+            </div>
+            <div class="balance-item">
+                <div class="label">🎯 Спинов</div>
+                <div class="value" id="spinsDisplay">0</div>
+            </div>
+        </div>
+
+        <div class="status" id="statusMessage">⏳ Введите имя и нажмите "Проверить"</div>
+
         <div class="controls">
-            <button class="btn" id="startBtn">🎲 Запустить</button>
-            <div class="counter">Позиция: <span id="positionDisplay">0</span></div>
+            <button class="btn btn-spin" id="startBtn">🎲 Крутить (1 токен)</button>
             <button class="btn btn-reset" id="resetBtn">🔄 Сброс</button>
         </div>
     </div>
 
-    <!-- Панель ввода ID пользователя -->
-    <div class="user-panel">
-        <label for="userId">🆔 Ваш Discord ID:</label>
-        <input type="text" id="userId" placeholder="Введите ваш ID (правый клик → Копировать ID)">
-        <div class="status" id="statusMessage">⏳ Ожидание</div>
-    </div>
-
+    <!-- ПОБЕДНЫЙ ОВЕРЛЕЙ -->
     <div class="win-overlay" id="winOverlay">
         <div class="win-text">
             🎉 ПОБЕДА! 🎉
             <div class="win-sub" id="winSub">Вы выиграли: Горы</div>
-            <div class="win-sub" style="font-size: 1.2rem; color: #57F287;" id="roleStatus"></div>
+            <div class="win-tokens" id="winTokens">💰 Осталось: 0 токенов</div>
         </div>
     </div>
 
     <div class="confetti-container" id="confettiContainer"></div>
 
     <div class="footer">
-        <span>✦</span> Введите свой Discord ID · Крутите рулетку · Получайте роли! <span>✦</span>
+        <span>✦</span> За 10 сообщений = 1 токен · 1 спин = 1 токен <span>✦</span>
     </div>
 
     <script>
         // ===== НАСТРОЙКИ =====
-        // 🚨 ИЗМЕНИТЕ ЭТОТ URL НА ВАШ СЕРВЕР!
-        const API_URL = '/api/give-role';
-
-        // Роли для рулетки (соответствуют серверным)
-        const items = [
-            { name: '🏔️ Роль 1', desc: 'Еёбок', badge: '⭐ ТОП' },
-            { name: '🌊 Роль 2', desc: 'Еблан', badge: '🔥 ХИТ' },
-            { name: '🌆 Роль 3', desc: 'Долбаёб', badge: '💎 ЛЮКС' },
-        ];
-
-        // ===== ОСТАЛЬНОЙ КОД РУЛЕТКИ =====
-        const track = document.getElementById('rouletteTrack');
-        const cardWidth = 310;
-        let totalCards = 0;
-        let currentX = 0;
-        let animationId = null;
+        const API_URL = '/api';
+        let currentUser = null;
+        let userTokens = 0;
         let isSpinning = false;
         let isStopping = false;
         let speed = 0;
-        let lastWinner = null;
-        let isGivingRole = false;
+        let currentX = 0;
+        let animationId = null;
+        let spinCount = 0;
 
-        // Создаём карточки
+        // Роли для рулетки
+        const items = [
+            { name: '🏔️ Роль 1', desc: 'Пиздец', badge: '⭐ ТОП' },
+            { name: '🌊 Роль 2', desc: 'Я ебал', badge: '🔥 ХИТ' },
+            { name: '🌆 Роль 3', desc: 'Это в рот', badge: '💎 ЛЮКС' },
+        ];
+
+        // ===== СОЗДАНИЕ КАРТОЧЕК =====
+        const track = document.getElementById('rouletteTrack');
+        const cardWidth = 310;
+        let totalCards = 0;
+
         function createCards() {
             const count = Math.max(items.length * 2, 9);
-            
             for (let i = 0; i < count; i++) {
                 const idx = i % items.length;
                 const item = items[idx];
@@ -507,6 +609,7 @@
         }
         createCards();
 
+        // ===== ФУНКЦИИ РУЛЕТКИ =====
         function findWinnerIndex() {
             const cards = track.querySelectorAll('.card');
             const containerWidth = track.parentElement.clientWidth;
@@ -519,7 +622,6 @@
                 const rect = card.getBoundingClientRect();
                 const cardCenter = rect.left + rect.width / 2;
                 const dist = Math.abs(cardCenter - centerX);
-                
                 if (dist < closestDist) {
                     closestDist = dist;
                     closestCard = card;
@@ -529,9 +631,7 @@
             cards.forEach(card => card.classList.remove('active'));
             if (closestCard) {
                 closestCard.classList.add('active');
-                const realIndex = parseInt(closestCard.dataset.realIndex);
-                document.getElementById('positionDisplay').textContent = realIndex + 1;
-                return realIndex;
+                return parseInt(closestCard.dataset.realIndex);
             }
             return 0;
         }
@@ -548,7 +648,6 @@
                 const rect = card.getBoundingClientRect();
                 const cardCenter = rect.left + rect.width / 2;
                 const dist = Math.abs(cardCenter - centerX);
-                
                 if (dist < closestDist) {
                     closestDist = dist;
                     closestCard = card;
@@ -558,79 +657,130 @@
             cards.forEach(card => card.classList.remove('active'));
             if (closestCard) {
                 closestCard.classList.add('active');
-                const realIndex = parseInt(closestCard.dataset.realIndex);
-                document.getElementById('positionDisplay').textContent = realIndex + 1;
             }
         }
 
         function reflowCards() {
             const cards = track.querySelectorAll('.card');
-            
             const firstCard = cards[0];
             const firstRect = firstCard.getBoundingClientRect();
-            
+
             if (firstRect.right < 0) {
                 const movedCard = track.removeChild(firstCard);
                 const lastCard = track.lastElementChild;
                 const newRealIndex = (parseInt(lastCard.dataset.realIndex) + 1) % items.length;
                 movedCard.dataset.realIndex = newRealIndex;
                 track.appendChild(movedCard);
-                
                 currentX += cardWidth;
                 track.style.transform = `translateX(${currentX}px)`;
             }
         }
 
-        // ===== ВЫДАЧА РОЛИ =====
-        async function giveRole(userId, roleName) {
-            if (isGivingRole) return;
-            isGivingRole = true;
+        // ===== ТОКЕНЫ =====
+        async function checkUser() {
+            const userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                setStatus('❌ Введите имя или ID', 'error');
+                return;
+            }
 
-            const statusEl = document.getElementById('statusMessage');
-            statusEl.textContent = '⏳ Выдаём роль...';
-            statusEl.className = 'status';
+            setStatus('⏳ Проверка...', '');
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(`${API_URL}/get-tokens`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ userId, roleName }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = userId;
+                    userTokens = data.tokens || 0;
+                    document.getElementById('tokensDisplay').textContent = userTokens;
+                    document.getElementById('messagesDisplay').textContent = data.messages || 0;
+                    document.getElementById('spinsDisplay').textContent = spinCount;
+                    setStatus(`✅ Пользователь: ${data.username || userId}`, 'success');
+                } else {
+                    setStatus(`❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                setStatus(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+
+        async function spendToken() {
+            if (!currentUser) {
+                setStatus('❌ Сначала проверьте пользователя!', 'error');
+                return false;
+            }
+
+            if (userTokens < 1) {
+                setStatus(`❌ Недостаточно токенов! У вас ${userTokens}`, 'error');
+                return false;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/spend-token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: currentUser })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    userTokens = data.tokens;
+                    document.getElementById('tokensDisplay').textContent = userTokens;
+                    spinCount++;
+                    document.getElementById('spinsDisplay').textContent = spinCount;
+                    setStatus(`✅ ${data.message}`, 'success');
+                    return true;
+                } else {
+                    setStatus(`❌ ${data.error}`, 'error');
+                    return false;
+                }
+            } catch (error) {
+                setStatus(`❌ Ошибка: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function giveRole(roleName) {
+            if (!currentUser) {
+                setStatus('❌ Пользователь не найден', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/give-role`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: currentUser, roleName })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
                     if (data.alreadyHas) {
-                        statusEl.textContent = `✅ Уже есть "${roleName}"`;
-                        statusEl.className = 'status success';
-                        document.getElementById('roleStatus').textContent = `✅ У вас уже есть эта роль!`;
+                        document.getElementById('winTokens').textContent = `✅ У вас уже есть эта роль!`;
                     } else {
-                        statusEl.textContent = `✅ Роль "${roleName}" выдана!`;
-                        statusEl.className = 'status success';
-                        document.getElementById('roleStatus').textContent = `✅ Роль "${roleName}" выдана!`;
+                        document.getElementById('winTokens').textContent = `✅ Роль "${roleName}" выдана!`;
                     }
                 } else {
-                    statusEl.textContent = `❌ ${data.error || 'Ошибка'}`;
-                    statusEl.className = 'status error';
-                    document.getElementById('roleStatus').textContent = `❌ ${data.error || 'Ошибка выдачи'}`;
+                    document.getElementById('winTokens').textContent = `❌ ${data.error || 'Ошибка выдачи'}`;
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                statusEl.textContent = '❌ Ошибка соединения с сервером';
-                statusEl.className = 'status error';
-                document.getElementById('roleStatus').textContent = '❌ Ошибка соединения';
+                document.getElementById('winTokens').textContent = `❌ Ошибка: ${error.message}`;
             }
-
-            isGivingRole = false;
         }
 
-        // ===== ОСТАЛЬНЫЕ ФУНКЦИИ РУЛЕТКИ =====
+        // ===== ФУНКЦИИ РУЛЕТКИ (продолжение) =====
         function createConfetti() {
             const container = document.getElementById('confettiContainer');
-            const colors = ['#5865F2', '#7289DA', '#57F287', '#ED4245', '#FEE75C', '#EB459E', '#5865F2', '#7289DA'];
-            
+            const colors = ['#f7971e', '#ffd200', '#57F287', '#ED4245', '#FEE75C', '#EB459E', '#f7971e', '#ffd200'];
+
             for (let i = 0; i < 80; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
@@ -639,7 +789,7 @@
                 const left = Math.random() * 100;
                 const duration = Math.random() * 2 + 2;
                 const delay = Math.random() * 1.5;
-                
+
                 confetti.style.cssText = `
                     left: ${left}%;
                     width: ${size}px;
@@ -662,18 +812,13 @@
             const overlay = document.getElementById('winOverlay');
             const sub = document.getElementById('winSub');
             sub.textContent = `🎯 Вы выиграли: ${itemName}`;
-            document.getElementById('roleStatus').textContent = '⏳ Выдача роли...';
+            document.getElementById('winTokens').textContent = `💰 Осталось: ${userTokens} токенов`;
             overlay.classList.add('show');
             createConfetti();
-            
-            // Автоматически выдаём роль, если введён ID
-            const userId = document.getElementById('userId').value.trim();
-            if (userId) {
-                giveRole(userId, itemName);
-            } else {
-                document.getElementById('roleStatus').textContent = '⚠️ Введите Discord ID для получения роли';
-            }
-            
+
+            // Выдаём роль
+            giveRole(itemName);
+
             setTimeout(() => {
                 overlay.classList.remove('show');
             }, 4500);
@@ -681,27 +826,26 @@
 
         function stopRoulette() {
             if (!isSpinning) return;
-            
+
             isSpinning = false;
             isStopping = false;
             if (animationId) {
                 cancelAnimationFrame(animationId);
                 animationId = null;
             }
-            
+
             document.getElementById('startBtn').disabled = false;
-            document.getElementById('startBtn').textContent = '🎲 Запустить';
-            
+            document.getElementById('startBtn').textContent = '🎲 Крутить (1 токен)';
+
             setTimeout(() => {
                 const winnerIdx = findWinnerIndex();
                 const winner = items[winnerIdx];
-                lastWinner = winner;
-                
+
                 const activeCard = track.querySelector('.card.active');
                 if (activeCard) {
                     activeCard.style.transition = 'box-shadow 0.3s ease';
-                    activeCard.style.boxShadow = '0 0 80px rgba(88, 101, 242, 0.9), 0 0 150px rgba(88, 101, 242, 0.5)';
-                    
+                    activeCard.style.boxShadow = '0 0 80px rgba(247, 151, 30, 0.9), 0 0 150px rgba(247, 151, 30, 0.5)';
+
                     let pulseCount = 0;
                     const pulseInterval = setInterval(() => {
                         if (pulseCount > 5) {
@@ -713,10 +857,9 @@
                         pulseCount++;
                     }, 200);
                 }
-                
+
                 showWinOverlay(winner.name);
-                document.getElementById('positionDisplay').textContent = winnerIdx + 1;
-                
+
             }, 100);
         }
 
@@ -728,7 +871,7 @@
                 }
                 return;
             }
-            
+
             if (isStopping) {
                 speed *= 0.997;
                 if (speed < 0.05) {
@@ -736,41 +879,49 @@
                     return;
                 }
             }
-            
+
             currentX -= speed;
             track.style.transform = `translateX(${currentX}px)`;
             updateActiveCard();
-            
+
             if (Math.floor(timestamp / 100) % 3 === 0) {
                 reflowCards();
             }
-            
+
             animationId = requestAnimationFrame(animateRoulette);
         }
 
-        function startRoulette() {
+        async function startRoulette() {
             if (isSpinning) return;
-            
+
+            // Проверяем токены
+            if (!currentUser) {
+                setStatus('❌ Сначала проверьте пользователя!', 'error');
+                return;
+            }
+
+            const canSpin = await spendToken();
+            if (!canSpin) return;
+
             if (animationId) {
                 cancelAnimationFrame(animationId);
                 animationId = null;
             }
-            
+
             document.getElementById('winOverlay').classList.remove('show');
             document.getElementById('confettiContainer').innerHTML = '';
-            document.getElementById('roleStatus').textContent = '';
-            
+
             isSpinning = true;
             isStopping = false;
-            
+
             speed = Math.random() * 8 + 12;
             const spinDuration = Math.random() * 5000 + 3000;
-            
+
             document.getElementById('startBtn').disabled = true;
             document.getElementById('startBtn').textContent = '⏳ Крутится...';
-            
+
             animateRoulette(0);
-            
+
             setTimeout(() => {
                 if (isSpinning) {
                     isStopping = true;
@@ -789,61 +940,71 @@
                 isStopping = false;
                 speed = 0;
             }
-            
+
             currentX = 0;
             track.style.transform = 'translateX(0px)';
-            
+
             const cards = track.querySelectorAll('.card');
             const sortedCards = Array.from(cards).sort((a, b) => {
                 return parseInt(a.dataset.index) - parseInt(b.dataset.index);
             });
-            
+
             sortedCards.forEach((card, i) => {
                 card.dataset.realIndex = i % items.length;
                 track.appendChild(card);
             });
-            
+
             document.getElementById('winOverlay').classList.remove('show');
             document.getElementById('confettiContainer').innerHTML = '';
-            document.getElementById('roleStatus').textContent = '';
-            
+
             document.getElementById('startBtn').disabled = false;
-            document.getElementById('startBtn').textContent = '🎲 Запустить';
-            
+            document.getElementById('startBtn').textContent = '🎲 Крутить (1 токен)';
+
             document.querySelectorAll('.card').forEach(card => {
                 card.style.boxShadow = '';
                 card.style.transform = '';
             });
-            
+
             setTimeout(findWinnerIndex, 100);
         }
 
+        function setStatus(text, type) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = text;
+            el.className = 'status ' + (type || '');
+        }
+
         // ===== ОБРАБОТЧИКИ =====
+        document.getElementById('checkBtn').addEventListener('click', checkUser);
         document.getElementById('startBtn').addEventListener('click', startRoulette);
         document.getElementById('resetBtn').addEventListener('click', resetRoulette);
 
+        document.getElementById('userId').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                checkUser();
+            }
+        });
+
         document.addEventListener('keydown', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
+            if (e.key === ' ' && !isSpinning) {
                 e.preventDefault();
-                if (!isSpinning) {
-                    startRoulette();
-                }
+                startRoulette();
             }
             if (e.key === 'r' || e.key === 'R') {
                 resetRoulette();
             }
         });
 
-        // Сохраняем ID пользователя в localStorage
-        document.getElementById('userId').addEventListener('change', function() {
-            localStorage.setItem('discordUserId', this.value.trim());
-        });
-
-        // Загружаем сохранённый ID
-        const savedId = localStorage.getItem('discordUserId');
-        if (savedId) {
-            document.getElementById('userId').value = savedId;
+        // Загрузка сохранённого пользователя
+        const savedUser = localStorage.getItem('discordUser');
+        if (savedUser) {
+            document.getElementById('userId').value = savedUser;
+            checkUser();
         }
+
+        document.getElementById('userId').addEventListener('change', function() {
+            localStorage.setItem('discordUser', this.value.trim());
+        });
 
         setTimeout(findWinnerIndex, 200);
         window.addEventListener('resize', () => {
@@ -852,8 +1013,9 @@
             }
         });
 
-        console.log('🎰 Дискорд рулетка запущена!');
-        console.log('📌 Введите свой Discord ID и крутите рулетку!');
+        console.log('🎰 Дискорд рулетка с токенами запущена!');
+        console.log('💬 За 10 сообщений = 1 токен');
+        console.log('🎯 1 спин = 1 токен');
     </script>
 
 </body>
