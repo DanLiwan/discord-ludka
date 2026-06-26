@@ -31,7 +31,7 @@ const client = new Client({
 const TOKEN = process.env.DISCORD_TOKEN;
 
 // НАСТРОЙКИ
-const MESSAGES_FOR_TOKEN = 10;
+const MESSAGES_FOR_TOKEN = 50;
 const TOKENS_PER_SPIN = 1;
 const VOICE_TOKEN_INTERVAL = 30 * 60 * 1000;
 
@@ -277,7 +277,7 @@ client.on('messageCreate', async (message) => {
 💬 **Сообщений:** \`${messagesCount}\`
 🎰 **Спинов:** \`${spins}\`
 
-> 📝 За 10 сообщений = 1 токен
+> 📝 За 50 сообщений = 1 токен
 > 🎤 За 30 минут в войсе = 1 токен
                     `,
                     color: 0xF7971E,
