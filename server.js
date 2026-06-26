@@ -58,17 +58,6 @@ client.on('messageCreate', async (message) => {
     messageCounts.set(key, currentCount);
 
     // За каждые MESSAGES_FOR_TOKEN сообщений даём токен
-    if (currentCount % MESSAGES_FOR_TOKEN === 0) {
-        try {
-            await db.addTokens(userId, username, 1);
-            console.log(`✅ +1 токен для ${username} (${currentCount} сообщений)`);
-            
-            // Уведомление в Discord
-            await message.channel.send(`🎰 ${message.author}, вы получили **1 токен** за активность! Всего токенов: ${await db.getTokens(userId)}`);
-        } catch (error) {
-            console.error('❌ Ошибка при выдаче токена:', error);
-        }
-    }
 });
 
 client.once('ready', () => {
