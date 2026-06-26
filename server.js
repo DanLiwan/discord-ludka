@@ -24,6 +24,7 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildVoiceStates, // 👈 ВАЖНО! Добавляем для голосовых каналов
     ]
 });
 
@@ -32,6 +33,7 @@ const TOKEN = process.env.DISCORD_TOKEN;
 // НАСТРОЙКИ
 const MESSAGES_FOR_TOKEN = 10;
 const TOKENS_PER_SPIN = 1;
+const VOICE_TOKEN_INTERVAL = 30 * 60 * 1000; // 30 минут
 
 // ⚠️ ЗАМЕНИТЕ НА РЕАЛЬНЫЕ ID РОЛЕЙ!
 const ROLE_MAPPING = {
@@ -45,9 +47,8 @@ const GUILD_ID = '1471915265280315433';
 // ===== КЕШ УЧАСТНИКОВ =====
 let membersCache = new Map();
 let cacheLastUpdate = 0;
-const CACHE_TTL = 60 * 60 * 1000; // 1 час
+const CACHE_TTL = 60 * 60 * 1000;
 
-// Функция: добавить участника в кеш
 function addMemberToCache(member) {
     membersCache.set(member.user.id, {
         id: member.user.id,
@@ -60,30 +61,23 @@ function addMemberToCache(member) {
     });
 }
 
-// Функция: удалить участника из кеша
 function removeMemberFromCache(userId) {
     membersCache.delete(userId);
 }
 
-// Функция: обновить кеш участника (при смене ника)
 function updateMemberInCache(member) {
     if (membersCache.has(member.user.id)) {
-        addMemberToCache(member); // Перезаписываем
+        addMemberToCache(member);
         console.log(`🔄 Обновлён кеш для ${member.user.username}`);
     }
 }
 
-// Полное обновление кеша
 async function refreshMemberCache() {
     try {
         const guild = await client.guilds.fetch(GUILD_ID);
         const members = await guild.members.fetch();
-        
         membersCache.clear();
-        members.forEach(member => {
-            addMemberToCache(member);
-        });
-        
+        members.forEach(member => addMemberToCache(member));
         cacheLastUpdate = Date.now();
         console.log(`✅ Кеш обновлён: ${membersCache.size} участников`);
         return true;
@@ -93,29 +87,82 @@ async function refreshMemberCache() {
     }
 }
 
-// Поиск пользователя в кеше
 function findUserInCache(searchQuery) {
     const query = searchQuery.trim().toLowerCase();
-    
     if (/^\d+$/.test(query)) {
         return membersCache.get(query) || null;
     }
-    
     for (const [id, data] of membersCache) {
-        if (data.username === query || 
-            data.nickname === query || 
-            data.globalName === query ||
-            data.displayName === query) {
+        if (data.username === query || data.nickname === query || data.globalName === query || data.displayName === query) {
             return data;
         }
     }
-    
     return null;
 }
 
-// ===== СОБЫТИЯ DISCORD (автообновление кеша) =====
+// ===== ГОЛОСОВЫЕ ТОКЕНЫ =====
+const voiceJoinTimes = new Map();
+const voiceIntervals = new Map();
 
-// 1. Новый участник зашёл на сервер
+async function checkVoiceTime(userId, username) {
+    const joinTime = voiceJoinTimes.get(userId);
+    if (!joinTime) return;
+    
+    const elapsed = Date.now() - joinTime;
+    if (elapsed >= VOICE_TOKEN_INTERVAL) {
+        try {
+            await db.addTokens(userId, username, 1);
+            console.log(`🎤 +1 токен за 30 минут в войсе для ${username}`);
+            voiceJoinTimes.set(userId, Date.now());
+        } catch (error) {
+            console.error('❌ Ошибка при выдаче токена за войс:', error);
+        }
+    }
+}
+
+client.on('voiceStateUpdate', async (oldState, newState) => {
+    if (newState.member.user.bot) return;
+    const userId = newState.member.id;
+    const username = newState.member.user.username;
+    const guildId = newState.guild.id;
+    if (guildId !== GUILD_ID) return;
+    
+    if (!oldState.channelId && newState.channelId) {
+        voiceJoinTimes.set(userId, Date.now());
+        console.log(`🔊 ${username} зашёл в голосовой канал`);
+        const interval = setInterval(() => {
+            const member = newState.guild.members.cache.get(userId);
+            if (!member || !member.voice.channelId) {
+                clearInterval(interval);
+                voiceIntervals.delete(userId);
+                voiceJoinTimes.delete(userId);
+                console.log(`🔇 ${username} вышел из голосового канала`);
+                return;
+            }
+            checkVoiceTime(userId, username);
+        }, 5000);
+        voiceIntervals.set(userId, interval);
+    }
+    if (oldState.channelId && !newState.channelId) {
+        const interval = voiceIntervals.get(userId);
+        if (interval) {
+            clearInterval(interval);
+            voiceIntervals.delete(userId);
+        }
+        voiceJoinTimes.delete(userId);
+        console.log(`🔇 ${username} вышел из голосового канала`);
+    }
+});
+
+process.on('SIGINT', () => {
+    for (const [userId, interval] of voiceIntervals) {
+        clearInterval(interval);
+    }
+    console.log('🧹 Интервалы очищены');
+    process.exit(0);
+});
+
+// ===== СОБЫТИЯ DISCORD =====
 client.on('guildMemberAdd', (member) => {
     if (member.guild.id === GUILD_ID) {
         addMemberToCache(member);
@@ -123,7 +170,6 @@ client.on('guildMemberAdd', (member) => {
     }
 });
 
-// 2. Участник вышел с сервера
 client.on('guildMemberRemove', (member) => {
     if (member.guild.id === GUILD_ID) {
         removeMemberFromCache(member.user.id);
@@ -131,22 +177,18 @@ client.on('guildMemberRemove', (member) => {
     }
 });
 
-// 3. Участник сменил ник
 client.on('guildMemberUpdate', (oldMember, newMember) => {
     if (newMember.guild.id === GUILD_ID) {
         updateMemberInCache(newMember);
-        console.log(`🔄 Обновлён кеш для ${newMember.user.username}`);
     }
 });
 
-// 4. При запуске бота — загружаем всех участников
 client.once('ready', async () => {
     console.log(`✅ Бот запущен как ${client.user.tag}`);
     await refreshMemberCache();
     console.log(`🌐 Сервер на порту ${process.env.PORT || 3000}`);
 });
 
-// Периодическое полное обновление (раз в час — для синхронизации)
 setInterval(async () => {
     await refreshMemberCache();
 }, CACHE_TTL);
@@ -157,20 +199,15 @@ const messageCounts = new Map();
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     if (!message.guild) return;
-
     const userId = message.author.id;
     const username = message.author.username;
-
-    // Убеждаемся, что пользователь есть в кеше (если нет — добавляем)
     if (!membersCache.has(userId)) {
         addMemberToCache(message.member);
         console.log(`➕ Добавлен в кеш через сообщение: ${username}`);
     }
-
     const key = `${message.guild.id}-${userId}`;
     const currentCount = (messageCounts.get(key) || 0) + 1;
     messageCounts.set(key, currentCount);
-
     if (currentCount % MESSAGES_FOR_TOKEN === 0) {
         try {
             await db.addTokens(userId, username, 1);
@@ -182,30 +219,17 @@ client.on('messageCreate', async (message) => {
 });
 
 // ===== API =====
-
-// Получить баланс токенов
 app.post('/api/get-tokens', async (req, res) => {
     const { userId } = req.body;
-    
     if (!userId) {
         return res.status(400).json({ success: false, error: '❌ Не указан пользователь' });
     }
-
     try {
         const userData = findUserInCache(userId);
-        
         if (!userData) {
-            return res.json({
-                success: true,
-                tokens: 0,
-                messages: 0,
-                username: userId,
-                found: false
-            });
+            return res.json({ success: true, tokens: 0, messages: 0, username: userId, found: false });
         }
-        
         const userInfo = await db.getUserInfo(userData.id);
-        
         res.json({
             success: true,
             tokens: userInfo?.tokens || 0,
@@ -214,34 +238,24 @@ app.post('/api/get-tokens', async (req, res) => {
             userId: userData.id,
             found: true
         });
-        
     } catch (error) {
         console.error('❌ Ошибка:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// Снять токены за спин
 app.post('/api/spend-token', async (req, res) => {
     const { userId } = req.body;
-    
     if (!userId) {
         return res.status(400).json({ success: false, error: '❌ Не указан пользователь' });
     }
-
     try {
         const userData = findUserInCache(userId);
-        
         if (!userData) {
-            return res.status(404).json({ 
-                success: false, 
-                error: '❌ Пользователь не найден на сервере' 
-            });
+            return res.status(404).json({ success: false, error: '❌ Пользователь не найден на сервере' });
         }
-        
         const userIdReal = userData.id;
         const tokens = await db.getTokens(userIdReal);
-        
         if (tokens < TOKENS_PER_SPIN) {
             return res.json({
                 success: false,
@@ -249,79 +263,47 @@ app.post('/api/spend-token', async (req, res) => {
                 tokens: tokens
             });
         }
-        
         const spent = await db.spendTokens(userIdReal, TOKENS_PER_SPIN);
         if (!spent) {
-            return res.json({
-                success: false,
-                error: '❌ Ошибка при списании токенов'
-            });
+            return res.json({ success: false, error: '❌ Ошибка при списании токенов' });
         }
-        
         const newBalance = await db.getTokens(userIdReal);
         res.json({
             success: true,
             tokens: newBalance,
             message: `✅ Списан 1 токен. Осталось: ${newBalance}`
         });
-        
     } catch (error) {
         console.error('❌ Ошибка:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// Выдать роль
 app.post('/api/give-role', async (req, res) => {
     const { userId, roleName } = req.body;
-
     if (!userId || !roleName) {
-        return res.status(400).json({ 
-            success: false, 
-            error: '❌ Не хватает данных' 
-        });
+        return res.status(400).json({ success: false, error: '❌ Не хватает данных' });
     }
-
     const roleId = ROLE_MAPPING[roleName];
     if (!roleId) {
-        return res.status(400).json({ 
-            success: false, 
-            error: `❌ Роль "${roleName}" не найдена в настройках` 
-        });
+        return res.status(400).json({ success: false, error: `❌ Роль "${roleName}" не найдена в настройках` });
     }
-
     try {
         const userData = findUserInCache(userId);
-        
         if (!userData) {
-            return res.status(404).json({ 
-                success: false, 
-                error: '❌ Пользователь не найден на сервере' 
-            });
+            return res.status(404).json({ success: false, error: '❌ Пользователь не найден на сервере' });
         }
-
         const guild = await client.guilds.fetch(GUILD_ID);
         const member = await guild.members.fetch(userData.id);
         const role = await guild.roles.fetch(roleId);
-
         if (!role) {
-            return res.status(404).json({ 
-                success: false, 
-                error: '❌ Роль не найдена на сервере' 
-            });
+            return res.status(404).json({ success: false, error: '❌ Роль не найдена на сервере' });
         }
-
         if (member.roles.cache.has(roleId)) {
-            return res.json({ 
-                success: true, 
-                message: `✅ У пользователя уже есть роль "${roleName}"`,
-                alreadyHas: true
-            });
+            return res.json({ success: true, message: `✅ У пользователя уже есть роль "${roleName}"`, alreadyHas: true });
         }
-
         await member.roles.add(role);
         console.log(`✅ Выдана роль "${roleName}" пользователю ${member.user.tag}`);
-        
         res.json({
             success: true,
             message: `✅ Роль "${roleName}" успешно выдана!`,
@@ -329,17 +311,12 @@ app.post('/api/give-role', async (req, res) => {
             userId: member.user.id,
             username: member.user.username
         });
-
     } catch (error) {
         console.error('❌ Ошибка:', error);
-        res.status(500).json({
-            success: false,
-            error: `❌ ${error.message}`
-        });
+        res.status(500).json({ success: false, error: `❌ ${error.message}` });
     }
 });
 
-// Статус кеша (для отладки)
 app.get('/api/cache-status', (req, res) => {
     res.json({
         size: membersCache.size,
