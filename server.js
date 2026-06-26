@@ -231,58 +231,46 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-// ===== КОМАНДА !токены =====
-client.on('messageCreate', async (message) => {
-    // Игнорируем ботов и сообщения не на сервере
-    if (message.author.bot) return;
-    if (!message.guild) return;
-    
-    // Проверяем, что команда начинается с !токены
-    if (!message.content.toLowerCase().startsWith('!токены')) return;
-    
-    try {
-        const userId = message.author.id;
-        const username = message.author.username;
-        
-        // Получаем токены из базы данных
-        const tokens = await db.getTokens(userId);
-        const userInfo = await db.getUserInfo(userId);
-        const messagesCount = userInfo?.messages_count || 0;
-        
-        // Отправляем ответ
-        await message.reply({
-            embeds: [{
-                title: '💰 Ваш баланс токенов',
-                description: `
+    // ===== 1. КОМАНДА: !токены =====
+    if (message.content.toLowerCase().startsWith('!токены')) {
+        try {
+            const tokens = await db.getTokens(userId);
+            const userInfo = await db.getUserInfo(userId);
+            const messagesCount = userInfo?.messages_count || 0;
+            const spins = userInfo?.spins || 0;
+            
+            await message.reply({
+                embeds: [{
+                    title: '💰 Ваш баланс токенов',
+                    description: `
 **${username}**, вот ваш баланс:
 
 🎯 **Токены:** \`${tokens}\`
 💬 **Сообщений:** \`${messagesCount}\`
-🎰 **Спинов:** \`${Math.floor(messagesCount / 10)}\`
+🎰 **Спинов:** \`${spins}\`
 
-> За 10 сообщений = 1 токен
-> За 30 минут в войсе = 1 токен
-                `,
-                color: 0xF7971E,
-                thumbnail: {
-                    url: message.author.displayAvatarURL({ dynamic: true })
-                },
-                timestamp: new Date().toISOString(),
-                footer: {
-                    text: '🎰 Ролльная LUDKAA',
-                    icon_url: message.guild.iconURL()
-                }
-            }]
-        });
-        
-        console.log(`📊 ${username} запросил баланс: ${tokens} токенов`);
-        
-    } catch (error) {
-        console.error('❌ Ошибка при выполнении команды !токены:', error);
-        await message.reply('❌ Произошла ошибка при получении баланса. Попробуйте позже.');
+> 📝 За 10 сообщений = 1 токен
+> 🎤 За 30 минут в войсе = 1 токен
+                    `,
+                    color: 0xF7971E,
+                    thumbnail: {
+                        url: message.author.displayAvatarURL({ dynamic: true })
+                    },
+                    timestamp: new Date().toISOString(),
+                    footer: {
+                        text: '🎰 Ролльная LUDKAA',
+                        icon_url: message.guild.iconURL()
+                    }
+                }]
+            });
+            
+            console.log(`📊 ${username} запросил баланс: ${tokens} токенов, ${spins} спинов`);
+        } catch (error) {
+            console.error('❌ Ошибка при выполнении команды !токены:', error);
+            await message.reply('❌ Произошла ошибка при получении баланса. Попробуйте позже.');
+        }
+        return;
     }
-});
-
 // ===== API =====
 app.post('/api/get-tokens', async (req, res) => {
     const { userId } = req.body;

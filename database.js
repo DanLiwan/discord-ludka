@@ -4,24 +4,25 @@ const path = require('path');
 const dbPath = path.join(__dirname, 'tokens.db');
 const db = new sqlite3.Database(dbPath);
 
-// Создаём таблицу с индексами для скорости
+// Создаём таблицу с полем spins
 db.run(`
     CREATE TABLE IF NOT EXISTS users (
         user_id TEXT PRIMARY KEY,
         username TEXT,
         tokens INTEGER DEFAULT 0,
         messages_count INTEGER DEFAULT 0,
+        spins INTEGER DEFAULT 0,
         last_message_time INTEGER
     )
 `);
 
-// Индекс для быстрого поиска по username
+// Индекс для быстрого поиска
 db.run(`CREATE INDEX IF NOT EXISTS idx_username ON users(username)`);
 
 function getTokens(userId) {
     return new Promise((resolve, reject) => {
         db.get(
-            'SELECT tokens FROM users WHERE user_id = ?',
+            'SELECT tokens, spins FROM users WHERE user_id = ?',
             [userId],
             (err, row) => {
                 if (err) reject(err);
@@ -34,8 +35,8 @@ function getTokens(userId) {
 function addTokens(userId, username, amount) {
     return new Promise((resolve, reject) => {
         db.run(
-            `INSERT INTO users (user_id, username, tokens, messages_count) 
-             VALUES (?, ?, ?, 1) 
+            `INSERT INTO users (user_id, username, tokens, messages_count, spins) 
+             VALUES (?, ?, ?, 1, 0) 
              ON CONFLICT(user_id) DO UPDATE SET 
                 tokens = tokens + ?,
                 messages_count = messages_count + 1,
@@ -52,7 +53,7 @@ function addTokens(userId, username, amount) {
 function spendTokens(userId, amount) {
     return new Promise((resolve, reject) => {
         db.run(
-            `UPDATE users SET tokens = tokens - ? 
+            `UPDATE users SET tokens = tokens - ?, spins = spins + 1 
              WHERE user_id = ? AND tokens >= ?`,
             [amount, userId, amount],
             function(err) {
