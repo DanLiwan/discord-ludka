@@ -1,3 +1,11 @@
+// Загружаем переменные окружения
+require('dotenv').config();
+
+// Для отладки - выводим все переменные (без значений)
+console.log('🔍 Переменные окружения загружены');
+console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL ? '✅ есть' : '❌ нет');
+console.log('🔍 DISCORD_TOKEN:', process.env.DISCORD_TOKEN ? '✅ есть' : '❌ нет');
+
 const express = require('express');
 const path = require('path');
 const { Client, GatewayIntentBits } = require('discord.js');
