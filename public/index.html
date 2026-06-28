@@ -722,6 +722,7 @@
     <!-- ОСТАЛЬНОЙ JavaScript ОСТАЁТСЯ БЕЗ ИЗМЕНЕНИЙ -->
     <script>
         // ===== НАСТРОЙКИ =====
+                // ===== НАСТРОЙКИ =====
         const API_URL = '/api';
         let currentUser = null;
         let userTokens = 0;
@@ -732,29 +733,29 @@
         let animationId = null;
         let spinCount = 0;
 
-        // Роли для рулетки
+        // Роли для рулетки с привязкой к картинкам
         const items = [
-            { name: 'Ташла ПТУ', desc: 'Пиздец', badge: '⭐ ТОП' },
-            { name: 'Нытик сука', desc: 'Я ебал', badge: '🔥 ХИТ' },
-            { name: 'Калопоглатитель', desc: 'Легенда чисто', badge: '💩 ЛЮКС' },
-            { name: 'Баакен', desc: 'Казахи удивляют', badge: '👺 ЧОРТ' },
-            { name: 'Скорострельный', desc: '🫅🏼 салфеток', badge: '💦 АХ~' },
-            { name: 'Рыбная братва', desc: 'Женщины', badge: '🎣 КРЮЧОК' },
-            { name: 'Чурка', desc: 'ZZZZ', badge: '👨‍🦲 ХРЮ' },
-            { name: 'Профитроль', desc: 'Скатерть', badge: '🍄‍🟫 ПРО' },
-            { name: 'ЖЕНСКИЕ НОГИ', desc: 'Богу стыдно', badge: '👅 ТБЛТК' },
-            { name: 'АрЫстан Назераке', desc: 'Кайфоый чел', badge: '😎 ЛЮКС' },
-            { name: 'Сифилисная сука', desc: 'So Good', badge: '👩🏼‍🦲 ПРЕЗИК' },
-            { name: 'Ваннорасказчик', desc: 'Ну литтрели я', badge: '🛁 ПЕНА' },
-            { name: 'Артём поедатель пельменей', desc: '', badge: '🥟 ХАМ' },
-            { name: 'Король Додепа', desc: 'Деп, додеп', badge: '👑 ЛАКИ' },
-            { name: 'Селезень', desc: 'Брух', badge: '🍩 ХЛЮП' },
-            { name: 'Пидрохлорид', desc: 'Хайзенбургер', badge: '🧪 БУМ' },
+            { name: 'Ташла ПТУ', desc: 'Пиздец', badge: '⭐ ТОП', img: 'пту.jpg' },
+            { name: 'Нытик сука', desc: 'Я ебал', badge: '🔥 ХИТ', img: 'нытик.jpg' },
+            { name: 'Калопоглатитель', desc: 'Легенда чисто', badge: '💩 ЛЮКС', img: 'калопоглотитель.jpg' },
+            { name: 'Баакен', desc: 'Казахи удивляют', badge: '👺 ЧОРТ', img: 'баакен.jpg' },
+            { name: 'Скорострельный', desc: '🫅🏼 салфеток', badge: '💦 АХ~', img: 'скорострел.jpg' },
+            { name: 'Рыбная братва', desc: 'Женщины', badge: '🎣 КРЮЧОК', img: 'рыбная братва.jpg' },
+            { name: 'Чурка', desc: 'ZZZZ', badge: '👨‍🦲 ХРЮ', img: 'чурка.jpg' },
+            { name: 'Профитроль', desc: 'Скатерть', badge: '🍄‍🟫 ПРО', img: 'профитроль.jffi' },
+            { name: 'ЖЕНСКИЕ НОГИ', desc: 'Богу стыдно', badge: '👅 ТБЛТК', img: 'женские ножки люблю пиздец.jpg' },
+            { name: 'АрЫстан Назераке', desc: 'Кайфоый чел', badge: '😎 ЛЮКС', img: 'арыстан незераки.jpg' },
+            { name: 'Сифилисная сука', desc: 'So Good', badge: '👩🏼‍🦲 ПРЕЗИК', img: 'сифилисная сука.jpg' },
+            { name: 'Ваннорасказчик', desc: 'Ну литтрели я', badge: '🛁 ПЕНА', img: 'ваннорассказчик.jpg' },
+            { name: 'Артём поедатель пельменей', desc: '', badge: '🥟 ХАМ', img: 'артем поедатель пельменей.jpg' },
+            { name: 'Король Додепа', desc: 'Деп, додеп', badge: '👑 ЛАКИ', img: 'король додепа.jff' },
+            { name: 'Селезень', desc: 'Брух', badge: '🍩 ХЛЮП', img: 'селезень.jpg' },
+            { name: 'Пидрохлорид', desc: 'Хайзенбургер', badge: '🧪 БУМ', img: 'пидрохлорид.jpg' },
         ];
 
         // ===== СОЗДАНИЕ КАРТОЧЕК =====
         const track = document.getElementById('rouletteTrack');
-        const cardWidth = 220; // Уменьшили для адаптивности
+        const cardWidth = 220;
 
         // Определяем размер карточки в зависимости от экрана
         function getCardWidth() {
@@ -771,6 +772,7 @@
         function createCards() {
             const count = Math.max(items.length * 2, 9);
             const currentCardWidth = getCardWidth();
+            
             for (let i = 0; i < count; i++) {
                 const idx = i % items.length;
                 const item = items[idx];
@@ -778,14 +780,19 @@
                 card.className = 'card';
                 card.dataset.index = i;
                 card.dataset.realIndex = idx;
-                const seed = idx + 1;
+                
+                // Используем имя файла из item.img
+                const imageFile = item.img;
+                
                 card.innerHTML = `
+                    <img src="pictures/${imageFile}" alt="${item.name}">
                     <div class="badge">${item.badge}</div>
                     <div class="overlay">
                         <h3>${item.name}</h3>
                         <p>${item.desc}</p>
                     </div>
                 `;
+                
                 // Применяем размер
                 card.style.flex = `0 0 ${currentCardWidth}px`;
                 track.appendChild(card);
@@ -1215,6 +1222,7 @@
         console.log('🎰 Дискорд рулетка с токенами запущена!');
         console.log('💬 За 50 сообщений = 1 токен');
         console.log('🎯 1 спин = 1 токен');
+        console.log('🖼️ Все картинки привязаны к своим ролям!');
     </script>
 
 </body>
