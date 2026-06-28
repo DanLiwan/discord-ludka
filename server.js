@@ -268,26 +268,32 @@ client.on('messageCreate', async (message) => {
     }
 
     // ===== КОМАНДА: !addtoken (только для администраторов) =====
+        // ===== КОМАНДА: !addtoken (только для администраторов) =====
     if (message.content.toLowerCase().startsWith('!addtoken')) {
-        // Проверяем, есть ли у пользователя права администратора
+        // Проверяем права администратора
         if (!message.member.permissions.has('Administrator')) {
             return message.reply('❌ У вас нет прав на использование этой команды!');
         }
         
+        // Разбираем аргументы: !addtoken @пользователь 5
         const args = message.content.split(' ');
+        console.log('🔍 Аргументы команды:', args); // Для отладки
+        
+        // Проверяем, что есть все аргументы
         if (args.length < 3) {
             return message.reply('❌ Использование: `!addtoken @пользователь количество`');
         }
         
-        // Находим пользователя
+        // Находим пользователя (первый упомянутый)
         const target = message.mentions.users.first();
         if (!target) {
             return message.reply('❌ Укажите пользователя: `!addtoken @пользователь 5`');
         }
         
-        const amount = parseInt(args[2]);
+        // Парсим количество токенов (последний аргумент)
+        const amount = parseInt(args[args.length - 1]);
         if (isNaN(amount) || amount <= 0) {
-            return message.reply('❌ Укажите положительное число токенов');
+            return message.reply('❌ Укажите положительное число токенов (например: `!addtoken @пользователь 5`)');
         }
         
         try {
@@ -296,7 +302,7 @@ client.on('messageCreate', async (message) => {
             console.log(`👑 ${message.author.username} выдал ${amount} токенов ${target.username}`);
         } catch (error) {
             console.error('❌ Ошибка при выдаче токенов:', error);
-            await message.reply('❌ Ошибка при выдаче токенов');
+            await message.reply(`❌ Ошибка при выдаче токенов: ${error.message}`);
         }
         return;
     }
