@@ -1,15 +1,19 @@
 // database.js
 const { Pool } = require('pg');
 
-// Используем переменную окружения для строки подключения
+// Логируем для отладки
+console.log('🔍 DATABASE_URL существует?', !!process.env.DATABASE_URL);
+if (process.env.DATABASE_URL) {
+    console.log('🔍 DATABASE_URL начинается с:', process.env.DATABASE_URL.substring(0, 30) + '...');
+}
+
+// Прямое подключение с явными параметрами
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+    ssl: false, // Отключаем SSL для внутреннего подключения
 });
 
-// Создаём таблицу
+// Создаём таблицу при запуске
 async function initDatabase() {
     const client = await pool.connect();
     try {
@@ -24,6 +28,10 @@ async function initDatabase() {
             )
         `);
         console.log('✅ Таблица users создана/обновлена');
+        return true;
+    } catch (error) {
+        console.error('❌ Ошибка создания таблицы:', error.message);
+        return false;
     } finally {
         client.release();
     }
@@ -41,7 +49,7 @@ async function getTokens(userId) {
     return result.rows[0]?.tokens || 0;
 }
 
-// Добавить токены
+// Добавить токены (автоматически, за сообщения)
 async function addTokens(userId, username, amount) {
     await pool.query(
         `INSERT INTO users (user_id, username, tokens, messages_count, spins) 
@@ -54,7 +62,7 @@ async function addTokens(userId, username, amount) {
     );
 }
 
-// Снять токены
+// Снять токены за спин
 async function spendTokens(userId, amount) {
     const result = await pool.query(
         `UPDATE users SET tokens = tokens - $1, spins = spins + 1 
@@ -73,7 +81,7 @@ async function getUserInfo(userId) {
     return result.rows[0] || null;
 }
 
-// Добавить токены вручную (для команды)
+// Добавить токены вручную (для команды !addtoken)
 async function addTokensManual(userId, username, amount) {
     await pool.query(
         `INSERT INTO users (user_id, username, tokens, messages_count, spins) 
