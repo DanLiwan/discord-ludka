@@ -259,6 +259,41 @@ client.on('messageCreate', async (message) => {
         return;
     }
 
+    // ===== КОМАНДА: !addtoken (только для администраторов) =====
+    if (message.content.toLowerCase().startsWith('!addtoken')) {
+        // Проверяем, есть ли у пользователя права администратора
+        if (!message.member.permissions.has('Administrator')) {
+            return message.reply('❌ У вас нет прав на использование этой команды!');
+        }
+        
+        const args = message.content.split(' ');
+        if (args.length < 3) {
+            return message.reply('❌ Использование: `!addtoken @пользователь количество`');
+        }
+        
+        // Находим пользователя
+        const target = message.mentions.users.first();
+        if (!target) {
+            return message.reply('❌ Укажите пользователя: `!addtoken @пользователь 5`');
+        }
+        
+        const amount = parseInt(args[2]);
+        if (isNaN(amount) || amount <= 0) {
+            return message.reply('❌ Укажите положительное число токенов');
+        }
+        
+        try {
+            await db.addTokensManual(target.id, target.username, amount);
+            await message.reply(`✅ Выдано **${amount}** токенов пользователю **${target.username}**!`);
+            console.log(`👑 ${message.author.username} выдал ${amount} токенов ${target.username}`);
+        } catch (error) {
+            console.error('❌ Ошибка при выдаче токенов:', error);
+            await message.reply('❌ Ошибка при выдаче токенов');
+        }
+        return;
+    }
+
+
     // ===== 1. КОМАНДА: !токены =====
     if (message.content.toLowerCase().startsWith('!токены')) {
         try {
