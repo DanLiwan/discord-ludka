@@ -2,7 +2,7 @@
 const { Pool } = require('pg');
 
 // ⚠️ ВРЕМЕННО: Жёстко прописываем URL (пока не починим переменные)
-const DATABASE_URL = 'postgresql://postgres:eqdGCFFDjZtgtjMZwjhkeHHEdmQYIMwrsr@postgres.railway.internal:5432/railway';
+const DATABASE_URL = 'postgresql://postgres:eqdGCFFDjZtgjMZwjhkeHHEdmQYIMWsr@postgres.railway.internal:5432/railway';
 
 console.log('🔍 Используем DATABASE_URL:', DATABASE_URL.substring(0, 40) + '...');
 
