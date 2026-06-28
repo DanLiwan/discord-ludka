@@ -1,22 +1,24 @@
 // database.js
 const { Pool } = require('pg');
 
-// Логируем для отладки
-console.log('🔍 DATABASE_URL существует?', !!process.env.DATABASE_URL);
-if (process.env.DATABASE_URL) {
-    console.log('🔍 DATABASE_URL начинается с:', process.env.DATABASE_URL.substring(0, 30) + '...');
-}
+// ⚠️ ВРЕМЕННО: Жёстко прописываем URL (пока не починим переменные)
+const DATABASE_URL = 'postgresql://postgres:eqdGCFFDjZtgtjMZwjhkeHHEdmQYIMwrsr@postgres.railway.internal:5432/railway';
 
-// Прямое подключение с явными параметрами
+console.log('🔍 Используем DATABASE_URL:', DATABASE_URL.substring(0, 40) + '...');
+
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: false, // Отключаем SSL для внутреннего подключения
+    connectionString: DATABASE_URL,
+    ssl: false,
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
 });
 
 // Создаём таблицу при запуске
 async function initDatabase() {
-    const client = await pool.connect();
+    let client;
     try {
+        client = await pool.connect();
         await client.query(`
             CREATE TABLE IF NOT EXISTS users (
                 user_id TEXT PRIMARY KEY,
@@ -31,9 +33,10 @@ async function initDatabase() {
         return true;
     } catch (error) {
         console.error('❌ Ошибка создания таблицы:', error.message);
+        console.error('❌ Полная ошибка:', error);
         return false;
     } finally {
-        client.release();
+        if (client) client.release();
     }
 }
 
